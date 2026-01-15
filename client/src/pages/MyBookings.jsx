@@ -1,8 +1,69 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Title from "../componets/Title";
-import { assets, userBookingsDummyData } from "../assets/assets";
+import { assets } from "../assets/assets";
+import { useAppContext } from "../conext/AppContext";
+import toast from "react-hot-toast";
 const MyBookings = () => {
-  const [bookings, setBookings] = useState(userBookingsDummyData);
+  const { axios, getToken, user } = useAppContext()
+  const [bookings, setBookings] = useState([]);
+
+  const handlePayNow = async (booking) => {
+    try {
+      const res = await axios.post('/api/payment/zalopay/create_order', {
+        bookingId: booking._id,
+        amount: booking.totalPrice
+      });
+
+      if (res.data.order_url) {
+        window.location.href = res.data.order_url;
+      } else {
+        toast.error("Không lấy được link thanh toán ZaloPay");
+      }
+
+    } catch (error) {
+      toast.error("Lỗi khi tạo thanh toán ZaloPay");
+      console.error(error);
+    }
+  };
+
+  const handleCancelBooking = async (bookingId) => {
+    try {
+      const { data } = await axios.put(`/api/bookings/cancel/${bookingId}`, {}, {
+        headers: { Authorization: `Bearer ${await getToken()}` }
+      });
+
+      if (data.success) {
+        toast.success("Đã huỷ đơn đặt phòng!");
+        fetchUserBookings(); // reload lại danh sách
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.error("❌ Cancel error:", error);
+      toast.error("Lỗi khi huỷ đơn");
+    }
+  }
+
+
+  const fetchUserBookings = async () => {
+    try {
+      const { data } = await axios.get('/api/bookings/user', { headers: { Authorization: `Bearer ${await getToken()}` } })
+      if (data.success) {
+        setBookings(data.bookings)
+      }
+      else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(error.message)
+    }
+  }
+
+  useEffect(() => {
+    if (user) {
+      fetchUserBookings()
+    }
+  }, [user])
   return (
     <div className='py-28 md:pb-35 md:pt-32 px-4 md:px-16 lg:px-24 xl:px-32'>
       <Title title='My Bookings' subTitle='Easily manage your past, current, and upcoming hotel reservations in one place. Plan your trips seamlessly with just a few clicks' align='left' />
@@ -53,17 +114,70 @@ const MyBookings = () => {
             </div>
             {/* Payment Status */}
             <div className="flex flex-col items-start justify-center pt-3">
-              <div className='flex items-center gap-2'>
+              {/* <div className='flex items-center gap-2'>
                 <div className={`h-3 w-3 rounded-full ${booking.isPaid ? "bg-green-500" : "bg-red-500"}`}></div>
                 <p className={`text-sm ${booking.isPaid ? "text-green-500" : "text-red-500"}`}>
                   {booking.isPaid ? "Paid" : "Unpaid"}
                 </p>
+              </div> */}
+
+              <div className='flex items-center gap-2'>
+                <div
+                  className={`h-3 w-3 rounded-full 
+                    ${booking.status === "cancelled"
+                      ? "bg-gray-500"
+                      : booking.isPaid
+                      ? "bg-green-500"
+                      : "bg-red-500"
+                    }`}
+                ></div>
+                <p
+                  className={`text-sm
+                    ${booking.status === "cancelled"
+                      ? "text-gray-500"
+                      : booking.isPaid
+                        ? "text-green-500"
+                        : "text-red-500"
+                    }`}
+                >
+                  {booking.status === "cancelled"
+                    ? "Cancelled"
+                    : booking.isPaid
+                      ? "Paid"
+                      : "Unpaid"}
+                </p>
               </div>
-              {!booking.isPaid && (
-                <button className='px-4 py-1.5 mt-4 text-xs border border-gray-400 rounded-full hover:bg-gray-50 transition-all cursor-pointer'>
+
+
+
+
+              {/* Them cancel */}
+              {/* {!booking.isPaid && (
+                <button onClick={() => handlePayNow(booking)} className='px-4 py-1.5 mt-4 text-xs border border-gray-400 rounded-full hover:bg-gray-50 transition-all cursor-pointer'>
                   Pay Now
                 </button>
+              )} */}
+
+
+              {!booking.isPaid && booking.status !== "cancelled" && (
+                <>
+                  <button onClick={() => handlePayNow(booking)} className='px-4 py-1.5 mt-4 text-xs border border-gray-400 rounded-full hover:bg-gray-50 transition-all cursor-pointer'>
+                    Pay Now
+                  </button>
+
+                  {booking.status !== "cancelled" && (
+                    <button
+                      onClick={() => handleCancelBooking(booking._id)}
+                      className='px-4 py-1.5 mt-2 text-xs border border-red-400 text-red-600 rounded-full hover:bg-red-50 transition-all cursor-pointer'>
+                      Cancel Booking
+                    </button>
+                  )}
+                </>
               )}
+
+
+
+
             </div>
           </div>
         ))}

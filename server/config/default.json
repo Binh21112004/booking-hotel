@@ -1,0 +1,6 @@
+{
+  "vnp_TmnCode": "1E0ASJKX",
+  "vnp_HashSecret": "3DM52G2GDPVDILOMQC5FFKJOOXD5YR8J",
+  "vnp_Url": "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html",
+  "vnp_ReturnUrl": "https://cf7b-183-91-7-119.ngrok-free.app/vnpay_return"
+}

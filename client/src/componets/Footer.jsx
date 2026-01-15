@@ -1,6 +1,16 @@
 import React from "react";
 import { assets } from "../assets/assets";
+import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
+import { useRef } from "react";
 const Footer = () => {
+  const inputElement = useRef();
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    toast.success("Subcribe successful!");
+    inputElement.current.value = "";
+  }
+
   return (
     <div className='bg-[#F6F9FC] text-gray-500/80 pt-8 px-6 md:px-16 lg:px-24 xl:px-32'>
       <div className='flex flex-wrap justify-between gap-12 md:gap-6'>
@@ -25,22 +35,22 @@ const Footer = () => {
         <div>
           <p className='font-playfair text-lg text-gray-800'>COMPANY</p>
           <ul className='mt-3 flex flex-col gap-2 text-sm'>
-            <li><a href="#">About</a></li>
-            <li><a href="#">Careers</a></li>
-            <li><a href="#">Press</a></li>
-            <li><a href="#">Blog</a></li>
-            <li><a href="#">Partners</a></li>
+            <li><Link to="/about" className="hover:text-gray-800 transition" >About</Link></li>
+            <li><a href="#" className="hover:text-gray-800 transition">Careers</a></li>
+            <li><a href="#" className="hover:text-gray-800 transition">Press</a></li>
+            <li><a href="#" className="hover:text-gray-800 transition">Blog</a></li>
+            <li><a href="#" className="hover:text-gray-800 transition">Partners</a></li>
           </ul>
         </div>
 
         <div>
           <p className='font-playfair text-lg text-gray-800'>SUPPORT</p>
           <ul className='mt-3 flex flex-col gap-2 text-sm'>
-            <li><a href="#">Help Center</a></li>
-            <li><a href="#">Safety Information</a></li>
-            <li><a href="#">Cancellation Options</a></li>
-            <li><a href="#">Contact Us</a></li>
-            <li><a href="#">Accessibility</a></li>
+            <li><a href="#" className="hover:text-gray-800 transition">Help Center</a></li>
+            <li><a href="#" className="hover:text-gray-800 transition">Safety Information</a></li>
+            <li><a href="#" className="hover:text-gray-800 transition">Cancellation Options</a></li>
+            <li><Link to="/contact" className="hover:text-gray-800 transition" >Contact Us</Link></li>
+            <li><a href="#" className="hover:text-gray-800 transition">Accessibility</a></li>
           </ul>
         </div>
 
@@ -49,13 +59,18 @@ const Footer = () => {
           <p className='mt-3 text-sm'>
             Subscribe to our newsletter for inspiration and special offers.
           </p>
-          <div className='flex items-center mt-4'>
-            <input type="text" className='bg-white rounded-l border border-gray-300 h-9 px-3 outline-none' placeholder='Your email' />
-            <button className='flex items-center justify-center bg-black h-9 w-9 aspect-square rounded-r'>
-              {/* Arrow icon */}
-              <img src={assets.arrowIcon} alt="arrow-icon" className='w-3.5 invert'/>
+          <form onSubmit={handleSubmit} className='flex items-center mt-4'>
+            <input
+              ref={inputElement}
+              type="email"
+              required
+              className='bg-white rounded-l border border-gray-300 h-9 px-3 outline-none'
+              placeholder='Your email'
+            />
+            <button type="submit" className='flex items-center justify-center bg-black h-9 w-9 aspect-square rounded-r'>
+              <img src={assets.arrowIcon} alt="arrow-icon" className='w-3.5 invert' />
             </button>
-          </div>
+          </form>
         </div>
       </div>
       <hr className='border-gray-300 mt-8' />
